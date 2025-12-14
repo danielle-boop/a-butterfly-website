@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Butterfly Bubble</title>
+<style>
+  body {
+    margin: 0;
+    background: radial-gradient(circle, #d9f7ff, #fce4ec);
+    font-family: 'Comic Sans MS', cursive;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  h1 { color: #ff3399; }
+  h2 { color: #ff66aa; }
+
+  .sky {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .bubble {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    border: 2px solid #ffb3d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    cursor: pointer;
+    animation: float 5s infinite ease-in-out;
+    transition: transform 0.2s;
+  }
+
+  @keyframes float {
+    from { transform: translateY(0); }
+    to { transform: translateY(-120px); }
+  }
+
+  .pop {
+    animation: popBubble 0.4s forwards;
+  }
+
+  @keyframes popBubble {
+    to {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>🦋 Butterfly Bubble Pop 🫧</h1>
+<nav class="butterfly-nav">
+  <a href="bubble.html">🫧 Bubble</a>
+  <a href="carousel.html">🎠 Carousel</a>
+  <a href="color.html">🎨 Color</a>
+  <a href="draw.html">✏️ Draw</a>
+  <a href="gallery.html">🖼️ Gallery</a>
+  <a href="game.html">🎮 Game</a>
+  <a href="garden.html">🌸 Garden</a>
+  <a href="life.html">🦋 Life</a>
+  <a href="playground.html">🛝 Playground</a>
+  <a href="world.html">🌍 World</a>
+</nav>
+<h2>Score: <span id="score">0</span> | Time: <span id="timer">120</span>s</h2>
+
+<div class="sky" id="sky"></div>
+
+<script>
+const sky = document.getElementById("sky");
+const scoreEl = document.getElementById("score");
+const timerEl = document.getElementById("timer");
+
+let score = 0;
+let timeLeft = 120; // seconds
+let gameOver = false;
+
+// Function to create a bubble
+function createBubble() {
+  if (gameOver) return; // stop creating new bubbles after game ends
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = "🦋";
+  bubble.style.left = Math.random() * 90 + "vw";
+  bubble.style.top = Math.random() * 80 + "vh";
+
+  bubble.onclick = () => {
+    bubble.classList.add("pop");
+    score++;
+    scoreEl.textContent = score;
+    setTimeout(() => bubble.remove(), 400);
+  };
+
+  sky.appendChild(bubble);
+
+  // Remove bubble after 8 seconds if not popped
+  setTimeout(() => bubble.remove(), 8000);
+}
+
+// Start creating bubbles every 1.2 seconds
+const bubbleInterval = setInterval(createBubble, 1200);
+
+// Timer countdown
+const timerInterval = setInterval(() => {
+  timeLeft--;
+  timerEl.textContent = timeLeft;
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    clearInterval(bubbleInterval);
+    gameOver = true;
+    alert("⏰ Time's up! Your score: " + score);
+  }
+}, 1000);
+</script>
+
+</body>
+</html>

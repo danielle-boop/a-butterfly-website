@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magical Butterfly Garden Game</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(to top, #0a0a2a, #1a1a40);
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    .glow-text {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      color: #ffb6c1;
+      text-shadow: 0 0 5px #ffb6c1, 0 0 10px #ff69b4, 0 0 20px #ff1493;
+      font-weight: bold;
+      pointer-events: none;
+      animation: pulse 2s infinite;
+      z-index: 10;
+    }
+
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 5px #ffb6c1, 0 0 10px #ff69b4, 0 0 20px #ff1493; }
+      50% { text-shadow: 0 0 15px #ffb6c1, 0 0 30px #ff69b4, 0 0 40px #ff1493; }
+    }
+
+    .garden {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .butterfly {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: url('data:image/jpeg;base64,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') no-repeat center/contain;
+      z-index: 5;
+    }
+
+    .trail {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #fff, #ff69b4);
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.8;
+      animation: fadeOut 1s forwards;
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 0.8; transform: scale(1); }
+      100% { opacity: 0; transform: scale(2); }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-text">✨ Watch the Magic Unfold! 🦋✨</div>
+  <nav class="butterfly-nav">
+  <a href="bubble.html">🫧 Bubble</a>
+  <a href="carousel.html">🎠 Carousel</a>
+  <a href="color.html">🎨 Color</a>
+  <a href="draw.html">✏️ Draw</a>
+  <a href="gallery.html">🖼️ Gallery</a>
+  <a href="game.html">🎮 Game</a>
+  <a href="garden.html">🌸 Garden</a>
+  <a href="life.html">🦋 Life</a>
+  <a href="playground.html">🛝 Playground</a>
+  <a href="world.html">🌍 World</a>
+</nav>
+  <div class="garden" id="garden">
+    <div class="butterfly" style="top:50px; left:20px;"></div>
+    <div class="butterfly" style="top:150px; left:100px;"></div>
+    <div class="butterfly" style="top:250px; left:200px;"></div>
+  </div>
+
+  <script>
+    const garden = document.getElementById('garden');
+    const butterflies = document.querySelectorAll('.butterfly');
+
+    // Define random flight paths
+    butterflies.forEach(butterfly => {
+      let x = parseInt(butterfly.style.left);
+      let y = parseInt(butterfly.style.top);
+      let dx = Math.random() * 2 + 1;
+      let dy = Math.random() * 2 + 1;
+
+      function moveButterfly() {
+        x += dx;
+        y += dy;
+
+        // Bounce off edges
+        if (x > window.innerWidth - 50 || x < 0) dx *= -1;
+        if (y > window.innerHeight - 50 || y < 0) dy *= -1;
+
+        butterfly.style.left = x + 'px';
+        butterfly.style.top = y + 'px';
+
+        // Create trail
+        const trail = document.createElement('div');
+        trail.className = 'trail';
+        trail.style.left = x + 20 + 'px';
+        trail.style.top = y + 20 + 'px';
+        garden.appendChild(trail);
+        setTimeout(() => trail.remove(), 1000);
+
+        requestAnimationFrame(moveButterfly);
+      }
+      moveButterfly();
+    });
+
+    // Random sparkles in garden
+    function createSparkle() {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'trail';
+      sparkle.style.left = Math.random() * window.innerWidth + 'px';
+      sparkle.style.top = Math.random() * window.innerHeight + 'px';
+      garden.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
+    }
+    setInterval(createSparkle, 300);
+  </script>
+</body>
+</html>

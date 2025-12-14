@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ultra Cute Butterfly Garden</title>
+  <style>
+    /* ===== BODY ===== */
+    body {
+      margin: 0;
+      background: linear-gradient(#cce7ff, #ffe6f2);
+      font-family: 'Comic Sans MS', cursive;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      color: #ff3399;
+    }
+
+    p {
+      color: #ff66aa;
+    }
+
+    /* ===== GARDEN ===== */
+    .garden {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* ===== BUTTERFLIES ===== */
+    .butterfly {
+      position: absolute;
+      font-size: 36px;
+      animation: fly 6s infinite alternate ease-in-out;
+    }
+
+    @keyframes fly {
+      from { transform: translateY(0) rotate(0deg); }
+      to { transform: translateY(-100px) rotate(10deg); }
+    }
+
+    /* ===== FLOWERS ===== */
+    .flower {
+      position: absolute;
+      font-size: 28px;
+      animation: bloom 0.7s ease-out;
+    }
+
+    @keyframes bloom {
+      0% { transform: scale(0) rotate(0deg); }
+      100% { transform: scale(1) rotate(15deg); }
+    }
+
+    /* ===== SPARKLES ===== */
+    .sparkle {
+      position: absolute;
+      font-size: 18px;
+      animation: sparkle 1s forwards;
+    }
+
+    @keyframes sparkle {
+      to {
+        opacity: 0;
+        transform: scale(2);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>🦋 Butterfly flowers🌸</h1>
+<nav class="butterfly-nav">
+  <a href="bubble.html">🫧 Bubble</a>
+  <a href="carousel.html">🎠 Carousel</a>
+  <a href="color.html">🎨 Color</a>
+  <a href="draw.html">✏️ Draw</a>
+  <a href="gallery.html">🖼️ Gallery</a>
+  <a href="game.html">🎮 Game</a>
+  <a href="garden.html">🌸 Garden</a>
+  <a href="life.html">🦋 Life</a>
+  <a href="playground.html">🛝 Playground</a>
+  <a href="world.html">🌍 World</a>
+</nav>
+<p>Click anywhere to grow magical flowers!</p>
+
+<div class="garden" id="garden"></div>
+
+<script>
+  const garden = document.getElementById("garden");
+  const flowers = ["🌸","🌼","🌷","🌹","🌺","💐"];
+
+  // Create butterflies
+  for (let i = 0; i < 6; i++) {
+    const b = document.createElement("div");
+    b.className = "butterfly";
+    b.textContent = "🦋";
+    b.style.left = Math.random() * 90 + "vw";
+    b.style.top = Math.random() * 60 + "vh";
+    b.style.animationDuration = 4 + Math.random() * 4 + "s";
+    garden.appendChild(b);
+  }
+
+  // Click to grow flowers + sparkles
+  document.addEventListener("click", (e) => {
+    // FLOWERS
+    for (let i = 0; i < 6; i++) {
+      const flower = document.createElement("div");
+      flower.className = "flower";
+      flower.textContent = flowers[Math.floor(Math.random() * flowers.length)];
+      flower.style.left = e.clientX + Math.random() * 60 - 30 + "px";
+      flower.style.top = e.clientY + Math.random() * 60 - 30 + "px";
+      garden.appendChild(flower);
+      setTimeout(() => flower.remove(), 5000);
+    }
+
+    // SPARKLES
+    for (let i = 0; i < 4; i++) {
+      const sparkle = document.createElement("div");
+      sparkle.className = "sparkle";
+      sparkle.textContent = "✨";
+      sparkle.style.left = e.clientX + Math.random() * 40 - 20 + "px";
+      sparkle.style.top = e.clientY + Math.random() * 40 - 20 + "px";
+      garden.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
+    }
+  });
+</script>
+
+</body>
+</html>

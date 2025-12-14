@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Butterfly Art — HTML CSS JS</title>
+<style>
+  :root{
+    --bg1:#0f172a;
+    --bg2:#08203a;
+    --accent:#ff6bcb;
+    --accent2:#7be1ff;
+    --butterfly-size:110px;
+  }
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    background: radial-gradient(1200px 700px at 10% 20%, rgba(123,225,255,0.06), transparent),
+                radial-gradient(900px 600px at 85% 80%, rgba(255,107,203,0.06), transparent),
+                linear-gradient(180deg,var(--bg1),var(--bg2));
+    color: #e6eef8;
+  }
+
+  /* Top controls */
+  .controls{
+    position:fixed;
+    left:16px;
+    top:16px;
+    z-index:1000;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    backdrop-filter: blur(6px) saturate(120%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    padding:8px;
+    border-radius:12px;
+    box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+  }
+  .btn{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.08);
+    color:inherit;
+    padding:8px 12px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:14px;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn.primary{
+    background: linear-gradient(90deg,var(--accent),var(--accent2));
+    color:#082033;
+    border:none;
+    box-shadow: 0 6px 18px rgba(123,225,255,0.06);
+  }
+
+  .label{
+    font-size:13px;
+    opacity:0.9;
+  }
+
+  /* The drawing area */
+  #stage{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    touch-action:manipulation;
+  }
+
+  /* Butterfly container (each entity) */
+  .butterfly{
+    position:absolute;
+    width:var(--butterfly-size);
+    height:calc(var(--butterfly-size) * 0.8);
+    pointer-events:none; /* let clicks pass through to stage */
+    transform-origin:center center;
+    will-change: transform, filter, opacity, left, top;
+    filter: drop-shadow(0 8px 18px rgba(2,6,23,0.6));
+  }
+
+  /* Glow ring */
+  .butterfly::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:140%;
+    height:140%;
+    border-radius:50%;
+    filter: blur(18px);
+    opacity:0.35;
+    background: radial-gradient(circle at 40% 30%, rgba(255,107,203,0.6), transparent 30%),
+                radial-gradient(circle at 70% 70%, rgba(123,225,255,0.6), transparent 20%);
+    z-index:-1;
+    pointer-events:none;
+  }
+
+  /* simple fluttering animation using CSS variables set by JS */
+  @keyframes floatWobble{
+    0%{ transform: translateY(0) rotate(var(--r,0deg)) scale(1); }
+    25%{ transform: translateY(-8px) rotate(calc(var(--r,0deg) * 1.05)) scale(1.02); }
+    50%{ transform: translateY(0) rotate(var(--r,0deg)) scale(1); }
+    75%{ transform: translateY(8px) rotate(calc(var(--r,0deg) * 0.95)) scale(0.98); }
+    100%{ transform: translateY(0) rotate(var(--r,0deg)) scale(1); }
+  }
+
+  .butterfly .body{
+    position:absolute;
+    inset:25% 46% 20% 46%;
+    background:linear-gradient(180deg,#1b2a3a,#0e2230);
+    border-radius:8px;
+    transform-origin:center;
+    z-index:2;
+    box-shadow: inset 0 -8px 14px rgba(0,0,0,0.45);
+  }
+
+  /* Use an inline SVG for wings; we'll style them via CSS variables */
+  .wing{
+    position:absolute;
+    width:60%;
+    height:100%;
+    top:0;
+    transform-origin: left center;
+    z-index:1;
+    pointer-events:none;
+    animation:wingBeat var(--beat,1s) ease-in-out infinite;
+  }
+  .wing.right{
+    right:0;
+    transform-origin:right center;
+    animation-name:wingBeatRight;
+  }
+
+  /* subtle wing beat keyframes */
+  @keyframes wingBeat{
+    0%{ transform: rotate(6deg) translateX(0); }
+    50%{ transform: rotate(-16deg) translateX(-6px); }
+    100%{ transform: rotate(6deg) translateX(0); }
+  }
+  @keyframes wingBeatRight{
+    0%{ transform: rotate(-6deg) translateX(0); }
+    50%{ transform: rotate(16deg) translateX(6px); }
+    100%{ transform: rotate(-6deg) translateX(0); }
+  }
+
+  /* the wing SVG path gets colorful gradient via mask */
+  .wing svg { display:block; width:100%; height:100%; }
+
+  /* glitter particle */
+  .glitter{
+    position:absolute;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    pointer-events:none;
+    animation:glitterRise 1.2s linear forwards;
+    opacity:0.9;
+  }
+  @keyframes glitterRise{
+    0%{ transform: translateY(0) scale(0.6); opacity:1; }
+    100%{ transform: translateY(-36px) scale(0.2); opacity:0; }
+  }
+
+  /* small responsive note */
+  .note{
+    position:fixed;
+    right:16px;
+    top:16px;
+    z-index:1000;
+    font-size:13px;
+    padding:8px 12px;
+    border-radius:10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03);
+  }
+
+  footer.credit{
+    position:fixed;
+    left:50%;
+    bottom:18px;
+    transform:translateX(-50%);
+    font-size:12px;
+    opacity:0.8;
+    background: rgba(0,0,0,0.18);
+    padding:8px 12px;
+    border-radius:999px;
+    z-index:1000;
+  }
+</style>
+ 
+<nav class="butterfly-nav">
+  <a href="bubble.html">🫧 Bubble</a>
+  <a href="carousel.html">🎠 Carousel</a>
+  <a href="color.html">🎨 Color</a>
+  <a href="draw.html">✏️ Draw</a>
+  <a href="gallery.html">🖼️ Gallery</a>
+  <a href="game.html">🎮 Game</a>
+  <a href="garden.html">🌸 Garden</a>
+  <a href="life.html">🦋 Life</a>
+  <a href="playground.html">🛝 Playground</a>
+  <a href="world.html">🌍 World</a>
+</nav>
+
+
+  <div class="controls" aria-hidden="false">
+    <button id="spawnBtn" class="btn primary">Spawn Butterfly 🦋</button>
+    <button id="autoBtn" class="btn">Auto: Off</button>
+    <button id="clearBtn" class="btn">Clear</button>
+    <span class="label">Click anywhere to add one.</span>
+  </div>
+
+  <div id="stage" role="application" aria-label="Butterfly art stage"></div>
+
+  <div class="note">Tip: Try clicking near edges for dramatic flight paths ✨</div>
+
+<script>
+/*
+  Butterfly Art
+  - Click anywhere to create a colorful butterfly
+  - Spawn button places one in the center
+  - Auto toggles continuous spawning
+  - Clear removes butterflies & particles
+*/
+
+const stage = document.getElementById('stage');
+const spawnBtn = document.getElementById('spawnBtn');
+const autoBtn = document.getElementById('autoBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+let autoSpawn = false;
+let autoHandle = null;
+
+/* Utility: random in range */
+const rand = (min, max) => Math.random() * (max - min) + min;
+
+/* Predefined color palettes for wings (pairs: left gradient, right gradient) */
+const palettes = [
+  ['#ff6bcb','#ffd1ff','#ff9fdb', '#7be1ff','#bfefff','#a2f1ff'],
+  ['#7be1ff','#7bf0c2','#bfffdc', '#ffcf6b','#ffd7a6','#ffebc2'],
+  ['#ffe36b','#ffd6a8','#ffd1a4', '#ff9fbf','#ff6bcb','#ff9fe6'],
+  ['#a78bfa','#c4b5fd','#e9d5ff', '#60a5fa','#93c5fd','#bfdbfe'],
+  ['#ff8a65','#ffd6aa','#ffd7d0', '#b39ddb','#d7bef4','#f0e6ff']
+];
+
+/* SVG template for a stylized wing - we use path with currentColor for simple masking */
+function wingSVG(){
+  return `<svg viewBox="0 0 200 200" preserveA spectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="var(--c1)"/>
+        <stop offset="60%" stop-color="var(--c2)"/>
+        <stop offset="100%" stop-color="var(--c3)"/>
+      </linearGradient>
+      <linearGradient id="g2" x1="1" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="var(--c3)"/>
+        <stop offset="50%" stop-color="var(--c2)"/>
+        <stop offset="100%" stop-color="var(--c1)"/>
+      </linearGradient>
+    </defs>
+    <!-- left wing -->
+    <path d="M60 120 C10 60, 40 10, 100 30 C140 40, 120 110, 60 120Z" fill="url(#g1)" opacity="0.96" />
+    <!-- right wing mirror -->
+    <path d="M140 120 C190 60, 160 10, 100 30 C60 40, 80 110, 140 120Z" fill="url(#g2)" opacity="0.96" />
+    <!-- decorative dots -->
+    <circle cx="95" cy="60" r="5" fill="rgba(255,255,255,0.72)"/>
+    <circle cx="120" cy="85" r="3" fill="rgba(255,255,255,0.6)"/>
+  </svg>`;
+}
+
+/* create one butterfly at (x,y) in viewport coords */
+function createButterfly(x, y, options = {}){
+  const b = document.createElement('div');
+  b.className = 'butterfly';
+
+  // random scale and rotation
+  const scale = options.scale ?? rand(0.6, 1.1);
+  const rotation = options.rotation ?? rand(-40,40);
+  const beat = options.beat ?? rand(0.8, 1.6); // wing beat duration
+
+  // size variation
+  b.style.setProperty('--beat', `${beat}s`);
+  b.style.setProperty('--r', `${rotation}deg`);
+  b.style.transform = `translate(${x - 0.5 * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--butterfly-size'))}px, ${y - 0.4 * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--butterfly-size'))}px) scale(${scale})`;
+
+  // pick palette
+  const pal = palettes[Math.floor(rand(0, palettes.length))];
+  // assign CSS variables for SVG gradients via inline style
+  b.style.setProperty('--c1', pal[0]);
+  b.style.setProperty('--c2', pal[1] ?? pal[0]);
+  b.style.setProperty('--c3', pal[2] ?? pal[1]);
+
+  // wiggle flight duration
+  const flightDur = rand(8, 20);
+  b.dataset.flightDur = flightDur;
+
+  // create inner structure: wings + body
+  const wingWrap = document.createElement('div');
+  wingWrap.className = 'wing left';
+  wingWrap.innerHTML = wingSVG();
+  const wingWrapR = document.createElement('div');
+  wingWrapR.className = 'wing right';
+  wingWrapR.innerHTML = wingSVG();
+
+  const body = document.createElement('div');
+  body.className = 'body';
+
+  b.appendChild(wingWrap);
+  b.appendChild(wingWrapR);
+  b.appendChild(body);
+
+  stage.appendChild(b);
+
+  // initial flying vector
+  const vx = rand(-0.6, 0.6);
+  const vy = rand(-0.18, -0.02);
+
+  // animate with requestAnimationFrame for smooth flight
+  let start = null;
+  let life = options.life ?? rand(18, 50); // seconds
+  const birth = performance.now();
+
+  function step(t){
+    if (!start) start = t;
+    const elapsed = (t - start) / 1000; // seconds since start
+
+    // position update using small noise + base velocity
+    const dx = vx * elapsed * 40 + Math.sin((birth + t) / 700) * 6;
+    const dy = vy * elapsed * 30 + Math.cos((birth + t) / 850) * 6;
+
+    // compute new position from transform (base translation + dx,dy)
+    // read current translate values (we stored original transform)
+    const base = b.__baseTranslate || {x: x, y: y};
+    const newX = base.x + dx;
+    const newY = base.y + dy - Math.sin((birth + t) / 1100) * 4;
+
+    b.style.transform = `translate(${newX - 0.5 * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--butterfly-size'))}px, ${newY - 0.4 * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--butterfly-size'))}px) scale(${scale}) rotate(${rotation}deg)`;
+
+    // tiny rotation wobble
+    const wob = Math.sin(t/200 + base.x) * 6;
+    b.style.transform += ` rotate(${wob}deg)`;
+
+    // occasionally emit glitter
+    if (Math.random() < 0.04) spawnGlitter(newX, newY, pal);
+
+    // fade out near end of life
+    const age = (t - birth) / 1000;
+    if (age > life){
+      // fade then remove
+      b.style.transition = 'opacity 1s linear, transform 1s linear';
+      b.style.opacity = '0';
+      setTimeout(()=> { b.remove(); }, 1100);
+      return;
+    }
+
+    // keep within bounds — bounce off edges
+    const rect = stage.getBoundingClientRect();
+    if (newX < 10 || newX > rect.width - 10) b.__baseTranslate.x = Math.max(10, Math.min(rect.width-10, base.x * -1)); // flip roughly
+    if (newY < 10) b.__baseTranslate.y = base.y + 40;
+
+    requestAnimationFrame(step);
+  }
+
+  // store base translate for reference
+  b.__baseTranslate = {x, y};
+
+  // start small appear animation
+  b.style.opacity = '0';
+  b.style.transition = 'opacity 420ms ease, transform 420ms ease';
+  requestAnimationFrame(()=> { b.style.opacity = '1'; });
+
+  requestAnimationFrame(step);
+  return b;
+}
+
+/* glitter particle */
+function spawnGlitter(x, y, pal){
+  const g = document.createElement('div');
+  g.className = 'glitter';
+  // random color from palette or bright accent
+  const col = pal[Math.floor(rand(0, pal.length))] ?? '#fff';
+  g.style.background = col;
+  g.style.left = `${x + rand(-10, 10)}px`;
+  g.style.top = `${y + rand(-6, 6)}px`;
+  g.style.opacity = `${rand(0.5,1)}`;
+  stage.appendChild(g);
+  // remove after animation
+  setTimeout(()=> g.remove(), 1500);
+}
+
+/* spawn at viewport center */
+spawnBtn.addEventListener('click', ()=> {
+  const rect = stage.getBoundingClientRect();
+  createButterfly(rect.width/2, rect.height/2);
+});
+
+/* stage click - spawn at pointer */
+stage.addEventListener('pointerdown', (e) => {
+  // ignore clicks on controls (in case event bubbles)
+  const rect = stage.getBoundingClientRect();
+  createButterfly(e.clientX - rect.left, e.clientY - rect.top);
+});
+
+/* auto spawn toggle */
+autoBtn.addEventListener('click', ()=> {
+  autoSpawn = !autoSpawn;
+  autoBtn.textContent = autoSpawn ? 'Auto: On' : 'Auto: Off';
+  if (autoSpawn){
+    autoHandle = setInterval(()=> {
+      const rect = stage.getBoundingClientRect();
+      createButterfly(rand(20, rect.width-20), rand(40, rect.height-40));
+    }, 900);
+  } else {
+    clearInterval(autoHandle);
+    autoHandle = null;
+  }
+});
+
+/* clear all butterflies & glitter */
+clearBtn.addEventListener('click', ()=> {
+  // remove all children
+  stage.querySelectorAll('.butterfly, .glitter').forEach(n => n.remove());
+});
+
+/* responsive: spawn a few on load for effect */
+window.addEventListener('load', ()=> {
+  const rect = stage.getBoundingClientRect();
+  for (let i=0;i<3;i++){
+    // disperse across the screen
+    setTimeout(()=> createButterfly(rand(20, rect.width-20), rand(40, rect.height-40)), i*250);
+  }
+});
+
+/* accessibility: stop auto spawn when tab hidden */
+document.addEventListener('visibilitychange', ()=> {
+  if (document.hidden && autoHandle){
+    clearInterval(autoHandle);
+    autoHandle = null;
+    autoSpawn = false;
+    autoBtn.textContent = 'Auto: Off';
+  }
+});
+</script>
+<footer class="glow-footer">
+  Made with 🦋 Love & Creativity • © 2025
+</footer>
+
+<style>
+  .glow-footer{
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 28px;
+    font-size: 15px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 40px;
+    backdrop-filter: blur(8px);
+
+    /* GLOW */
+    box-shadow:
+      0 0 12px rgba(255, 107, 203, 0.65),
+      0 0 30px rgba(123, 225, 255, 0.55),
+      inset 0 0 12px rgba(255,255,255,0.2);
+
+    /* ANIMATED GLOW */
+    animation: glowPulse 3.5s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0% {
+      box-shadow:
+        0 0 10px rgba(255, 107, 203, 0.5),
+        0 0 20px rgba(123, 225, 255, 0.4),
+        inset 0 0 6px rgba(255,255,255,0.15);
+    }
+    50% {
+      box-shadow:
+        0 0 20px rgba(255, 107, 203, 0.8),
+        0 0 45px rgba(123, 225, 255, 0.7),
+        inset 0 0 10px rgba(255,255,255,0.3);
+    }
+    100% {
+      box-shadow:
+        0 0 10px rgba(255, 107, 203, 0.5),
+        0 0 20px rgba(123, 225, 255, 0.4),
+        inset 0 0 6px rgba(255,255,255,0.15);
+    }
+  }
+</style>
+
+</body>
+</html>

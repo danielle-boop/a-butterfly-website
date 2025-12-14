@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Butterfly Drawing Canvas</title>
+<style>
+  body {
+    margin: 0;
+    background: #fce4ec;
+    font-family: 'Comic Sans MS', cursive;
+    text-align: center;
+  }
+
+  h1 { color: #ff3399; }
+  p { color: #ff66aa; }
+
+  canvas {
+    border: 2px solid #ff99cc;
+    display: block;
+    margin: 20px auto;
+    background: linear-gradient(#cce7ff, #ffe6f2);
+    cursor: crosshair;
+  }
+
+  .colors {
+    margin: 10px;
+  }
+
+  .color-btn {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #333;
+    margin: 2px;
+    display: inline-block;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<h1>🦋 Butterfly Drawing Canvas</h1>
+<nav class="butterfly-nav">
+  <a href="bubble.html">🫧 Bubble</a>
+  <a href="carousel.html">🎠 Carousel</a>
+  <a href="color.html">🎨 Color</a>
+  <a href="draw.html">✏️ Draw</a>
+  <a href="gallery.html">🖼️ Gallery</a>
+  <a href="game.html">🎮 Game</a>
+  <a href="garden.html">🌸 Garden</a>
+  <a href="life.html">🦋 Life</a>
+  <a href="playground.html">🛝 Playground</a>
+  <a href="world.html">🌍 World</a>
+</nav>
+
+<p>Draw butterflies by clicking and dragging!</p>
+
+<div class="colors">
+  <div class="color-btn" style="background: #ff4da6;" data-color="#ff4da6"></div>
+  <div class="color-btn" style="background: #33cc33;" data-color="#33cc33"></div>
+  <div class="color-btn" style="background: #3399ff;" data-color="#3399ff"></div>
+  <div class="color-btn" style="background: #ffcc00;" data-color="#ffcc00"></div>
+  <div class="color-btn" style="background: #9933ff;" data-color="#9933ff"></div>
+</div>
+
+<canvas id="canvas" width="800" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let drawing = false;
+let color = "#ff4da6";
+
+// Handle color change
+document.querySelectorAll(".color-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    color = btn.getAttribute("data-color");
+  });
+});
+
+// Start drawing
+canvas.addEventListener("mousedown", () => drawing = true);
+canvas.addEventListener("mouseup", () => drawing = false);
+canvas.addEventListener("mouseout", () => drawing = false);
+
+// Draw butterflies on mouse move
+canvas.addEventListener("mousemove", (e) => {
+  if (!drawing) return;
+
+  const x = e.offsetX;
+  const y = e.offsetY;
+
+  // Draw simple butterfly (two wings + body)
+  ctx.fillStyle = color;
+
+  // Wings
+  ctx.beginPath();
+  ctx.ellipse(x-10, y, 10, 20, Math.PI/4, 0, 2*Math.PI);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x+10, y, 10, 20, -Math.PI/4, 0, 2*Math.PI);
+  ctx.fill();
+
+  // Body
+  ctx.fillStyle = "#333";
+  ctx.fillRect(x-2, y-10, 4, 20);
+
+  // Sparkles ✨
+  ctx.fillStyle = "#fff";
+  for (let i=0; i<3; i++) {
+    ctx.fillRect(x + Math.random()*6 - 3, y + Math.random()*6 - 3, 2, 2);
+  }
+});
+</script>
+
+</body>
+</html>

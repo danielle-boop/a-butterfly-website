@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Butterfly Life Cycle</title>
+
+<style>
+  body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(135deg,#ffe6f0,#e6f7ff);
+    font-family: "Comic Sans MS", "Segoe UI", sans-serif;
+    overflow:hidden;
+  }
+
+  .card{
+    background:white;
+    padding:30px 40px;
+    border-radius:25px;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,0.15);
+    width:320px;
+  }
+
+  h1{
+    margin:0 0 10px;
+    color:#ff6fae;
+  }
+
+  .stage{
+    font-size:90px;
+    animation:bounce 1.5s infinite;
+  }
+
+  @keyframes bounce{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-15px); }
+  }
+
+  .label{
+    margin-top:10px;
+    font-size:18px;
+    color:#555;
+  }
+
+  button{
+    margin-top:20px;
+    padding:12px 22px;
+    border:none;
+    border-radius:20px;
+    background:linear-gradient(135deg,#ff9acb,#ff6fae);
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    box-shadow:0 8px 15px rgba(255,111,174,0.4);
+    transition:transform 0.2s;
+  }
+
+  button:hover{
+    transform:scale(1.05);
+  }
+
+  .dots{
+    margin-top:15px;
+  }
+
+  .dot{
+    width:12px;
+    height:12px;
+    background:#ddd;
+    border-radius:50%;
+    display:inline-block;
+    margin:0 4px;
+  }
+
+  .dot.active{
+    background:#ff6fae;
+  }
+
+  /* sparkles */
+  .sparkle{
+    position:absolute;
+    font-size:18px;
+    animation: sparkle 1s forwards;
+    pointer-events:none;
+  }
+
+  @keyframes sparkle{
+    0%{ opacity:1; transform:translateY(0) scale(1); }
+    100%{ opacity:0; transform:translateY(-40px) scale(0.3); }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🦋 Life Cycle</h1>
+  <nav class="butterfly-nav">
+  <a href="bubble.html">🫧 Bubble</a>
+  <a href="carousel.html">🎠 Carousel</a>
+  <a href="color.html">🎨 Color</a>
+  <a href="draw.html">✏️ Draw</a>
+  <a href="gallery.html">🖼️ Gallery</a>
+  <a href="game.html">🎮 Game</a>
+  <a href="garden.html">🌸 Garden</a>
+  <a href="life.html">🦋 Life</a>
+  <a href="playground.html">🛝 Playground</a>
+  <a href="world.html">🌍 World</a>
+</nav>
+
+
+  <div class="stage" id="stage">🥚</div>
+  <div class="label" id="label">Egg</div>
+
+  <button onclick="nextStage()">Next ➜</button>
+
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+  const stages = [
+    {emoji:"🥚", name:"Egg"},
+    {emoji:"🐛", name:"Caterpillar"},
+    {emoji:"🟤", name:"Chrysalis"},
+    {emoji:"🦋", name:"Butterfly"}
+  ];
+
+  let index = 0;
+
+  const stageEl = document.getElementById("stage");
+  const labelEl = document.getElementById("label");
+  const dotsEl  = document.getElementById("dots");
+
+  function drawDots(){
+    dotsEl.innerHTML = "";
+    stages.forEach((_,i)=>{
+      const d=document.createElement("span");
+      d.className="dot"+(i===index?" active":"");
+      dotsEl.appendChild(d);
+    });
+  }
+
+  function sparkle(){
+    const s=document.createElement("div");
+    s.className="sparkle";
+    s.innerText="✨";
+    s.style.left=Math.random()*window.innerWidth+"px";
+    s.style.top=Math.random()*window.innerHeight+"px";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1000);
+  }
+
+  function nextStage(){
+    index = (index+1)%stages.length;
+    stageEl.innerText = stages[index].emoji;
+    labelEl.innerText = stages[index].name;
+    drawDots();
+
+    for(let i=0;i<6;i++){
+      setTimeout(sparkle,i*80);
+    }
+  }
+
+  drawDots();
+</script>
+
+</body>
+</html>

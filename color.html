@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Color the Butterfly</title>
+
+<style>
+  body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(135deg,#fff0f6,#e8f7ff);
+    font-family:"Comic Sans MS","Segoe UI",sans-serif;
+  }
+
+  .card{
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.15);
+    text-align:center;
+    width:350px;
+  }
+
+  h1{
+    margin:0;
+    color:#ff6fae;
+  }
+
+  p{
+    color:#666;
+    font-size:14px;
+  }
+
+  .tools{
+    margin:15px 0;
+  }
+
+  input[type=color]{
+    width:45px;
+    height:45px;
+    border:none;
+    border-radius:50%;
+    cursor:pointer;
+  }
+
+  button{
+    margin-left:10px;
+    padding:10px 18px;
+    border:none;
+    border-radius:20px;
+    background:linear-gradient(135deg,#ff9acb,#ff6fae);
+    color:white;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 6px 12px rgba(255,111,174,0.4);
+  }
+
+  svg{
+    width:260px;
+    margin-top:10px;
+  }
+
+  svg path, svg ellipse{
+    fill:#fff;
+    stroke:#333;
+    stroke-width:2;
+    cursor:pointer;
+    transition:transform 0.2s, fill 0.2s;
+  }
+
+  svg path:hover, svg ellipse:hover{
+    transform:scale(1.05);
+  }
+
+  /* sparkle */
+  .sparkle{
+    position:absolute;
+    font-size:18px;
+    pointer-events:none;
+    animation:sparkle 0.8s forwards;
+  }
+
+  @keyframes sparkle{
+    from{opacity:1; transform:translateY(0) scale(1);}
+    to{opacity:0; transform:translateY(-30px) scale(0.3);}
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🦋 Color the Butterfly</h1>
+  <nav class="butterfly-nav">
+  <a href="bubble.html">🫧 Bubble</a>
+  <a href="carousel.html">🎠 Carousel</a>
+  <a href="color.html">🎨 Color</a>
+  <a href="draw.html">✏️ Draw</a>
+  <a href="gallery.html">🖼️ Gallery</a>
+  <a href="game.html">🎮 Game</a>
+  <a href="garden.html">🌸 Garden</a>
+  <a href="life.html">🦋 Life</a>
+  <a href="playground.html">🛝 Playground</a>
+  <a href="world.html">🌍 World</a>
+</nav>
+
+  <p>Tap the wings or body to color them 🎨</p>
+
+  <div class="tools">
+    <input type="color" id="color" value="#ff9acb">
+    <button onclick="reset()">Reset</button>
+  </div>
+
+  <!-- Finished Butterfly -->
+  <svg viewBox="0 0 200 200">
+    <!-- Left Wing -->
+    <path d="M100 100 
+             C20 20, 10 180, 90 140 Z" onclick="paint(this)"/>
+
+    <!-- Right Wing -->
+    <path d="M100 100 
+             C180 20, 190 180, 110 140 Z" onclick="paint(this)"/>
+
+    <!-- Left Inner Wing -->
+    <path d="M100 110 
+             C50 60, 50 140, 90 130 Z" onclick="paint(this)"/>
+
+    <!-- Right Inner Wing -->
+    <path d="M100 110 
+             C150 60, 150 140, 110 130 Z" onclick="paint(this)"/>
+
+    <!-- Body -->
+    <ellipse cx="100" cy="115" rx="8" ry="35" onclick="paint(this)"/>
+
+    <!-- Head -->
+    <ellipse cx="100" cy="70" rx="10" ry="10" onclick="paint(this)"/>
+
+    <!-- Antennas -->
+    <path d="M95 60 Q70 30 60 20" fill="none" stroke="#333"/>
+    <path d="M105 60 Q130 30 140 20" fill="none" stroke="#333"/>
+  </svg>
+</div>
+
+<script>
+  const picker = document.getElementById("color");
+
+  function paint(el){
+    el.style.fill = picker.value;
+    sparkle(el);
+  }
+
+  function reset(){
+    document.querySelectorAll("svg path, svg ellipse")
+      .forEach(e=>e.style.fill="#fff");
+  }
+
+  function sparkle(el){
+    const s=document.createElement("div");
+    s.className="sparkle";
+    s.innerText="✨";
+    const r=el.getBoundingClientRect();
+    s.style.left=r.left+r.width/2+"px";
+    s.style.top=r.top+r.height/2+"px";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),800);
+  }
+</script>
+
+</body>
+</html>
